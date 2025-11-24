@@ -68,7 +68,7 @@ export default function FishShopLanding() {
             <div className="flex items-center gap-2">
               {/* TODO: REPLACE 'logo.png' WITH YOUR LOGO FILENAME */}
               <img
-                src="/logo.png"
+                src="https://raw.githubusercontent.com/GingerMustache/fish_landing/refs/heads/main/public/logo.png"
                 alt={`${SHOP_CONFIG.name} Logo`}
                 className="h-12 w-12 object-contain rounded-lg"
               />
@@ -146,7 +146,7 @@ export default function FishShopLanding() {
             <div className="h-full min-h-[310px] bg-slate-100 rounded-3xl overflow-hidden relative border border-slate-200">
               {/* TODO: REPLACE 'map-location.jpg' WITH YOUR IMAGE FILENAME */}
               <img
-                src="/map_yandex.png"
+                src="https://raw.githubusercontent.com/GingerMustache/fish_landing/refs/heads/main/public/map_yandex.png"
                 alt="Map Preview"
                 className="absolute inset-0 w-full h-full object-cover opacity-80"
               />
