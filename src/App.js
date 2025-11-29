@@ -124,7 +124,7 @@ export default function FishShopLanding() {
 
               {/* Button 1: Route */}
               <ActionButton
-                title="Проложить путь"
+                title="Проложить маршрут"
                 subLabel="Навигатор"
                 icon={Navigation}
                 colorClass="bg-blue-100 text-blue-800"
