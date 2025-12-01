@@ -269,13 +269,6 @@ export default function FishShopLanding() {
                 -mx-4 px-4 md:mx-0 md:px-0
                 scrollbar-hide
             ">
-              <ActionButton
-                title="Проложить маршрут"
-                subLabel="Навигатор"
-                icon={Navigation}
-                colorClass="bg-blue-100 text-blue-800"
-                onClick={() => window.open(SHOP_CONFIG.yandexMapsRouteUrl, '_blank')}
-              />
 
               <ActionButton
                 title="2ГИС"
@@ -291,6 +284,14 @@ export default function FishShopLanding() {
                 icon={ExternalLink}
                 colorClass="bg-yellow-100 text-yellow-800"
                 onClick={() => window.open(SHOP_CONFIG.yandexMapLink, '_blank')}
+              />
+
+              <ActionButton
+                title="Проложить маршрут"
+                subLabel="Навигатор"
+                icon={Navigation}
+                colorClass="bg-blue-100 text-blue-800"
+                onClick={() => window.open(SHOP_CONFIG.yandexMapsRouteUrl, '_blank')}
               />
             </div>
 
