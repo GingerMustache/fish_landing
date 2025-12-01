@@ -17,7 +17,7 @@ const SHOP_CONFIG = {
 const ActionButton = ({ title, subLabel, onClick, icon: Icon, colorClass }) => (
   <motion.button
     onClick={onClick}
-    className="group relative flex items-center justify-between w-full md:w-auto md:flex-1 p-4 md:p-6 bg-slate-50 hover:bg-white rounded-2xl transition-all duration-300 border-2 border-transparent hover:border-slate-200 hover:shadow-xl active:scale-95 text-left"
+    className="snap-center shrink-0 min-w-[280px] md:min-w-0 group relative flex items-center justify-between w-full md:w-auto md:flex-1 p-4 md:p-6 bg-slate-50 hover:bg-white rounded-2xl transition-all duration-300 border-2 border-transparent hover:border-slate-200 hover:shadow-xl active:scale-95 text-left"
     whileTap={{ scale: 0.97 }}
   >
     <div>
@@ -134,7 +134,32 @@ const FooterContent = ({ shopConfig }) => {
 
 export default function FishShopLanding() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // NEW: State for tracking the active slide (0, 1, or 2)
+  const [activeSlide, setActiveSlide] = useState(0);
+
   const telegramUrl = `https://t.me/${SHOP_CONFIG.telegramUsername}`;
+
+  // NEW: Function to handle scroll and update active dot
+  const handleScroll = (e) => {
+    const { scrollLeft, scrollWidth, clientWidth } = e.target;
+    const maxScroll = scrollWidth - clientWidth;
+
+    // Safety check to avoid division by zero
+    if (maxScroll <= 0) return;
+
+    // Calculate progress from 0.0 to 1.0
+    const progress = scrollLeft / maxScroll;
+
+    // Determine active slide based on progress
+    if (progress < 0.33) {
+      setActiveSlide(0);
+    } else if (progress > 0.66) {
+      setActiveSlide(2);
+    } else {
+      setActiveSlide(1);
+    }
+  };
 
   return (
     <motion.div
@@ -149,11 +174,10 @@ export default function FishShopLanding() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center gap-3">
-              {/* Added fallback handling for the image just in case */}
               <img
                 src="https://raw.githubusercontent.com/GingerMustache/fish_landing/refs/heads/main/public/logo.png"
                 alt="Logo"
-                className="h-10 w-10 object-contain rounded-lg bg-slate-100"
+                className="h-10 w-10 object-contain rounded-lg bg-slate-50"
                 onError={(e) => { e.target.style.display = 'none' }}
               />
               <span className="font-bold text-xl text-slate-900 tracking-tight">
@@ -198,13 +222,16 @@ export default function FishShopLanding() {
         </AnimatePresence>
       </nav>
 
+
       {/* --- HERO SECTION --- */}
       <section className="relative pt-32 pb-20 px-4 min-h-[80vh] flex flex-col items-center justify-center overflow-hidden">
+
         <div className="absolute top-0 left-0 w-full h-full bg-slate-50 z-0">
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-100/50 rounded-full blur-3xl opacity-60"></div>
         </div>
 
         <div className="relative z-10 w-full max-w-5xl mx-auto text-center">
+
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -224,13 +251,25 @@ export default function FishShopLanding() {
             Лучшие морепродукты в Новокузнецке. Находимся на Губернском рынке.
           </motion.p>
 
+          {/* --- THE CENTER CONTAINER --- */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="bg-white p-3 rounded-[2rem] shadow-2xl shadow-blue-900/10 border border-slate-100 mx-auto max-w-4xl"
+            className="w-full md:w-auto md:bg-white md:p-3 md:rounded-[2rem] md:shadow-2xl md:shadow-blue-900/10 md:border md:border-slate-100 mx-auto max-w-4xl"
           >
-            <div className="flex flex-col md:flex-row gap-3">
+
+            {/* Horizontal Scroll Container */}
+            <div
+              onScroll={handleScroll} // Added scroll listener
+              className="
+                flex flex-row gap-3
+                overflow-x-auto
+                snap-x snap-mandatory
+                pb-4 md:pb-0
+                -mx-4 px-4 md:mx-0 md:px-0
+                scrollbar-hide
+            ">
               <ActionButton
                 title="Проложить маршрут"
                 subLabel="Навигатор"
@@ -238,6 +277,7 @@ export default function FishShopLanding() {
                 colorClass="bg-blue-100 text-blue-800"
                 onClick={() => window.open(SHOP_CONFIG.yandexMapsRouteUrl, '_blank')}
               />
+
               <ActionButton
                 title="2ГИС"
                 subLabel="Открыть карту"
@@ -245,6 +285,7 @@ export default function FishShopLanding() {
                 colorClass="bg-green-100 text-green-800"
                 onClick={() => window.open(SHOP_CONFIG.twoGisUrl, '_blank')}
               />
+
               <ActionButton
                 title="Яндекс Карты"
                 subLabel="Открыть карту"
@@ -253,6 +294,24 @@ export default function FishShopLanding() {
                 onClick={() => window.open(SHOP_CONFIG.yandexMapLink, '_blank')}
               />
             </div>
+
+            {/* NEW: Dynamic Scroll Indicators (Dots) */}
+            <div className="md:hidden flex justify-center gap-2 -mt-1 mb-4">
+              {[0, 1, 2].map((index) => (
+                <div
+                  key={index}
+                  className={`
+                    h-2 rounded-full transition-all duration-300
+                    ${activeSlide === index
+                      ? 'w-6' // Active: Wide and Dark Blue
+                      : 'w-2 bg-slate-300' // Inactive: Small and Grey
+                    }
+                  `}
+                  style={{ backgroundColor: activeSlide === index ? 'rgb(21,35,62)' : '' }}
+                />
+              ))}
+            </div>
+
           </motion.div>
 
           <motion.div
@@ -264,6 +323,7 @@ export default function FishShopLanding() {
             <MapPin className="inline w-4 h-4 mr-1 -mt-1" />
             {SHOP_CONFIG.address}
           </motion.div>
+
         </div>
       </section>
 
