@@ -43,19 +43,14 @@ const PrimaryButton = ({ children, onClick, icon: Icon }) => (
 );
 
 const AboutSectionContent = ({ telegramUrl }) => {
-  // ИЗМЕНЕНО: два отдельных ref для разных триггеров анимации
   const headerRef = useRef(null);
   const contentRef = useRef(null);
 
-  // ИЗМЕНЕНО: бейдж и заголовок появляются сразу (amount: 0.01)
   const isHeaderInView = useInView(headerRef, { once: true, amount: 0.01 });
-
-  // ИЗМЕНЕНО: описание и карточка появляются при дальнейшем скролле (amount: 0.1)
   const isContentInView = useInView(contentRef, { once: true, amount: 0.1 });
 
   return (
     <div>
-      {/* ИЗМЕНЕНО: бейдж и заголовок появляются сразу */}
       <motion.div
         ref={headerRef}
         initial={{ opacity: 0, y: 30 }}
@@ -72,7 +67,6 @@ const AboutSectionContent = ({ telegramUrl }) => {
         </h2>
       </motion.div>
 
-      {/* ИЗМЕНЕНО: описание и карточка появляются при дальнейшем скролле */}
       <motion.div
         ref={contentRef}
         initial={{ opacity: 0, y: 30 }}
@@ -143,12 +137,9 @@ const FooterContent = ({ shopConfig }) => {
 export default function FishShopLanding() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // NEW: State for tracking the active slide (0, 1, or 2)
   const [activeSlide, setActiveSlide] = useState(0);
 
   const telegramUrl = `https://t.me/${SHOP_CONFIG.telegramUsername}`;
-
-  // NEW: Function to handle scroll and update active dot
   const handleScroll = (e) => {
     const { scrollLeft, scrollWidth, clientWidth } = e.target;
     const maxScroll = scrollWidth - clientWidth;
@@ -221,7 +212,7 @@ export default function FishShopLanding() {
               transition={{ duration: 0.2 }}
               className="md:hidden bg-white border-t border-slate-100 absolute w-full shadow-xl"
             >
-              <div className="px-4 pt-2 pb-6 space-y-2">
+              <div className="px-4 pt-2 pb-2 space-y-2">
                 <a href="#about" onClick={() => setIsMobileMenuOpen(false)} className="block py-3 px-4 rounded-lg hover:bg-slate-50 text-slate-800 font-medium">О нас</a>
                 <a href={telegramUrl} target="_blank" rel="noreferrer" className="block py-3 px-4 rounded-lg hover:bg-slate-50 text-blue-900 font-bold">Телеграм Канал</a>
               </div>
@@ -232,8 +223,7 @@ export default function FishShopLanding() {
 
 
       {/* --- HERO SECTION --- */}
-      {/* ИЗМЕНЕНО: уменьшен pb-20 до pb-12 для уменьшения отступа снизу */}
-      <section className="relative pt-32 pb-12 px-4 min-h-[80vh] flex flex-col items-center justify-center overflow-hidden">
+      <section className="relative pt-24 pb-2 md:pb-12 px-4 min-h-[75vh] md:min-h-[80vh] flex flex-col items-center justify-center overflow-hidden">
 
         <div className="absolute top-0 left-0 w-full h-full bg-slate-50 z-0">
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-100/50 rounded-full blur-3xl opacity-60"></div>
@@ -245,7 +235,7 @@ export default function FishShopLanding() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight"
+            className="text-4xl md:text-6xl font-black text-slate-900 mb-7 tracking-tight"
           >
             Свежая рыба <br />
             <span style={{ color: 'rgb(21,35,62)' }}>на вашем столе</span>
@@ -255,7 +245,7 @@ export default function FishShopLanding() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-lg md:text-xl text-slate-500 mb-12 max-w-2xl mx-auto"
+            className="text-lg md:text-xl text-slate-500 mb-14 max-w-2xl mx-auto"
           >
             Лучшие морепродукты в Новокузнецке. Находимся на Губернском рынке.
           </motion.p>
@@ -304,7 +294,6 @@ export default function FishShopLanding() {
               />
             </div>
 
-            {/* NEW: Dynamic Scroll Indicators (Dots) */}
             <div className="md:hidden flex justify-center gap-2 -mt-1 mb-4">
               {[0, 1, 2].map((index) => (
                 <div
@@ -323,12 +312,11 @@ export default function FishShopLanding() {
 
           </motion.div>
 
-          {/* ИЗМЕНЕНО: уменьшен mt-8 до mt-4 для уменьшения отступа сверху */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.5 }}
-            className="mt-4 text-sm text-slate-400 font-medium"
+            className="mt-12 md:mt-12 text-sm text-slate-400 font-medium"
           >
             <MapPin className="inline w-4 h-4 mr-1 -mt-1" />
             {SHOP_CONFIG.address}
@@ -337,7 +325,6 @@ export default function FishShopLanding() {
         </div>
       </section>
 
-      {/* ИЗМЕНЕНО: уменьшен py-24 до py-16 для уменьшения отступа сверху секции */}
       <section id="about" className="py-16 bg-white relative">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <AboutSectionContent telegramUrl={telegramUrl} />
