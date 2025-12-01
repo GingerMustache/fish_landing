@@ -43,59 +43,67 @@ const PrimaryButton = ({ children, onClick, icon: Icon }) => (
 );
 
 const AboutSectionContent = ({ telegramUrl }) => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.3 });
+  // ИЗМЕНЕНО: два отдельных ref для разных триггеров анимации
+  const headerRef = useRef(null);
+  const contentRef = useRef(null);
 
-  const sectionVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, staggerChildren: 0.2 } },
-  };
+  // ИЗМЕНЕНО: бейдж и заголовок появляются сразу (amount: 0.01)
+  const isHeaderInView = useInView(headerRef, { once: true, amount: 0.01 });
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-  };
+  // ИЗМЕНЕНО: описание и карточка появляются при дальнейшем скролле (amount: 0.1)
+  const isContentInView = useInView(contentRef, { once: true, amount: 0.1 });
 
   return (
-    <motion.div
-      ref={ref}
-      variants={sectionVariants}
-      initial="hidden"
-      animate={isInView ? "visible" : "hidden"}
-    >
-      <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 text-slate-600 text-sm font-semibold uppercase tracking-wider mb-8">
-        <Info size={16} />
-        О магазине
+    <div>
+      {/* ИЗМЕНЕНО: бейдж и заголовок появляются сразу */}
+      <motion.div
+        ref={headerRef}
+        initial={{ opacity: 0, y: 30 }}
+        animate={isHeaderInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 text-slate-600 text-sm font-semibold uppercase tracking-wider mb-6">
+          <Info size={16} />
+          О магазине
+        </div>
+
+        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-8">
+          Качество, которому доверяют
+        </h2>
       </motion.div>
 
-      <motion.h2 variants={itemVariants} className="text-3xl md:text-4xl font-bold text-slate-900 mb-8">
-        Качество, которому доверяют
-      </motion.h2>
-
-      <motion.div variants={itemVariants} className="prose prose-lg mx-auto text-slate-600 mb-12 leading-relaxed">
-        <p className="mb-4">
-          «Рыба моя» — это не просто магазин, это место, где мы тщательно отбираем для вас самые свежие морепродукты. Мы работаем напрямую с проверенными поставщиками, чтобы гарантировать качество каждого товара на прилавке.
-        </p>
-        <p>
-          В нашем ассортименте вы найдете всё: от свежемороженой рыбы до изысканных деликатесов. Мы гордимся тем, что наши покупатели возвращаются к нам снова и снова. Приходите и убедитесь сами!
-        </p>
-      </motion.div>
-
-      <motion.div variants={itemVariants} className="bg-slate-50 rounded-3xl p-8 md:p-12 border border-slate-100">
-        <div className="flex flex-col items-center">
-          <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-6">
-            <Send size={32} />
-          </div>
-          <h3 className="text-2xl font-bold text-slate-900 mb-3">Свежий улов в Телеграм</h3>
-          <p className="text-slate-500 mb-8 max-w-md">
-            Подпишитесь на наш канал, чтобы первыми узнавать о новых поставках, акциях и специальных предложениях.
+      {/* ИЗМЕНЕНО: описание и карточка появляются при дальнейшем скролле */}
+      <motion.div
+        ref={contentRef}
+        initial={{ opacity: 0, y: 30 }}
+        animate={isContentInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="prose prose-lg mx-auto text-slate-600 mb-12 leading-relaxed">
+          <p className="mb-4">
+            «Рыба моя» — это не просто магазин, это место, где мы тщательно отбираем для вас самые свежие морепродукты. Мы работаем напрямую с проверенными поставщиками, чтобы гарантировать качество каждого товара на прилавке.
           </p>
-          <PrimaryButton icon={Send} onClick={() => window.open(telegramUrl, '_blank')}>
-            Перейти в группу
-          </PrimaryButton>
+          <p>
+            В нашем ассортименте вы найдете всё: от свежемороженой рыбы до изысканных деликатесов. Мы гордимся тем, что наши покупатели возвращаются к нам снова и снова. Приходите и убедитесь сами!
+          </p>
+        </div>
+
+        <div className="bg-slate-50 rounded-3xl p-8 md:p-12 border border-slate-100">
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-6">
+              <Send size={32} />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-900 mb-3">Свежий улов в Телеграм</h3>
+            <p className="text-slate-500 mb-8 max-w-md">
+              Подпишитесь на наш канал, чтобы первыми узнавать о новых поставках, акциях и специальных предложениях.
+            </p>
+            <PrimaryButton icon={Send} onClick={() => window.open(telegramUrl, '_blank')}>
+              Перейти в группу
+            </PrimaryButton>
+          </div>
         </div>
       </motion.div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -166,7 +174,7 @@ export default function FishShopLanding() {
       className="min-h-screen bg-slate-50 font-sans text-slate-600"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.9 }}
     >
 
       {/* --- NAVIGATION --- */}
@@ -224,7 +232,8 @@ export default function FishShopLanding() {
 
 
       {/* --- HERO SECTION --- */}
-      <section className="relative pt-32 pb-20 px-4 min-h-[80vh] flex flex-col items-center justify-center overflow-hidden">
+      {/* ИЗМЕНЕНО: уменьшен pb-20 до pb-12 для уменьшения отступа снизу */}
+      <section className="relative pt-32 pb-12 px-4 min-h-[80vh] flex flex-col items-center justify-center overflow-hidden">
 
         <div className="absolute top-0 left-0 w-full h-full bg-slate-50 z-0">
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-100/50 rounded-full blur-3xl opacity-60"></div>
@@ -314,11 +323,12 @@ export default function FishShopLanding() {
 
           </motion.div>
 
+          {/* ИЗМЕНЕНО: уменьшен mt-8 до mt-4 для уменьшения отступа сверху */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.5 }}
-            className="mt-8 text-sm text-slate-400 font-medium"
+            className="mt-4 text-sm text-slate-400 font-medium"
           >
             <MapPin className="inline w-4 h-4 mr-1 -mt-1" />
             {SHOP_CONFIG.address}
@@ -327,7 +337,8 @@ export default function FishShopLanding() {
         </div>
       </section>
 
-      <section id="about" className="py-24 bg-white relative">
+      {/* ИЗМЕНЕНО: уменьшен py-24 до py-16 для уменьшения отступа сверху секции */}
+      <section id="about" className="py-16 bg-white relative">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <AboutSectionContent telegramUrl={telegramUrl} />
         </div>
