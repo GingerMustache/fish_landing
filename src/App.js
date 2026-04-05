@@ -23,45 +23,45 @@ const getSocialLinks = (telegramUrl) => [
   { href: SHOP_CONFIG.maxMessengerUrl, label: "MAX" },
 ];
 
-const getAboutSocialCards = (telegramUrl) => [
+/** Один текст для блока: Телеграм + группа ВК + MAX */
+const ABOUT_SHARED_SOCIAL_DESCRIPTION =
+  "Хиты продаж, рецепты, уникальные предложения, акции, и розыгрыши - выберите, как с нами связаться: Телеграм, группа ВКонтакте или мессенджер MAX.";
+
+const getAboutSharedSocialButtons = (telegramUrl) => [
   {
     key: "telegram",
     href: telegramUrl,
-    title: "Телеграм",
-    description:
-      "Подпишитесь на канал — новые поставки, акции и специальные предложения.",
-    cta: "Перейти",
+    label: "Телеграм",
+    ariaLabel: "Перейти в Телеграм",
     icon: Send,
     iconBg: "bg-sky-100 text-sky-600",
   },
   {
     key: "vkGroup",
     href: SHOP_CONFIG.vkGroupUrl,
-    title: "Группа ВКонтакте",
-    description: "Общение, отзывы и вопросы — присоединяйтесь к сообществу покупателей.",
-    cta: "Перейти",
+    label: "ВК",
+    ariaLabel: "Перейти в группу ВКонтакте",
     icon: Users,
     iconBg: "bg-blue-100 text-blue-600",
   },
   {
-    key: "vkChannel",
-    href: SHOP_CONFIG.vkChannelUrl,
-    title: "Канал ВКонтакте",
-    description: "Новости, анонсы и короткие обновления в ленте ВК.",
-    cta: "Перейти",
-    icon: Radio,
-    iconBg: "bg-indigo-100 text-indigo-600",
-  },
-  {
     key: "max",
     href: SHOP_CONFIG.maxMessengerUrl,
-    title: "Мессенджер MAX",
-    description: "Напишите нам напрямую — ответим на вопросы и поможем с заказом.",
-    cta: "Перейти",
+    label: "MAX",
+    ariaLabel: "Перейти в мессенджер MAX",
     icon: MessageCircle,
     iconBg: "bg-violet-100 text-violet-600",
   },
 ];
+
+const getAboutVkChannelCard = () => ({
+  key: "vkChannel",
+  href: SHOP_CONFIG.vkChannelUrl,
+  description: "Канал ВК - наличие в ассортименте, свежие поставки, предзаказы.",
+  cta: "Перейти",
+  icon: Radio,
+  iconBg: "bg-indigo-100 text-indigo-600",
+});
 
 // --- COMPONENTS ---
 
@@ -81,9 +81,11 @@ const ActionButton = ({ title, subLabel, onClick, icon: Icon, colorClass }) => (
   </motion.button>
 );
 
-const PrimaryButton = ({ children, onClick, icon: Icon }) => (
+const PrimaryButton = ({ children, onClick, icon: Icon, "aria-label": ariaLabel }) => (
   <motion.button
+    type="button"
     onClick={onClick}
+    aria-label={ariaLabel}
     className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full font-bold text-white text-sm shadow-md shadow-blue-900/15 hover:shadow-lg hover:shadow-blue-900/30 hover:-translate-y-0.5 transition-all active:translate-y-0 active:scale-95"
     style={{ backgroundColor: 'rgb(21,35,62)' }}
     whileTap={{ scale: 0.97 }}
@@ -111,22 +113,43 @@ const AboutSocialCard = ({ card, className = "" }) => {
   );
 };
 
-const AboutSectionContent = ({ aboutSocialCards }) => {
+const AboutSharedSocialBlock = ({ description, buttons }) => (
+  <div className="flex flex-col items-center text-center bg-white rounded-2xl p-6 md:p-8 border border-slate-100 shadow-sm">
+    <div className="flex flex-row flex-wrap justify-center items-center gap-5 md:gap-6 mb-6">
+      {buttons.map((btn) => {
+        const Icon = btn.icon;
+        return (
+          <div
+            key={btn.key}
+            className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center shrink-0 ${btn.iconBg}`}
+            aria-hidden
+          >
+            <Icon size={30} />
+          </div>
+        );
+      })}
+    </div>
+    <p className="text-slate-500 mb-6 text-sm leading-relaxed max-w-xl">{description}</p>
+    <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 w-full max-w-lg">
+      {buttons.map((btn) => (
+        <PrimaryButton
+          key={btn.key}
+          aria-label={btn.ariaLabel}
+          onClick={() => window.open(btn.href, "_blank")}
+        >
+          {btn.label}
+        </PrimaryButton>
+      ))}
+    </div>
+  </div>
+);
+
+const AboutSectionContent = ({ sharedDescription, sharedButtons, vkChannelCard }) => {
   const headerRef = useRef(null);
   const contentRef = useRef(null);
-  const [activeSocialSlide, setActiveSocialSlide] = useState(0);
 
   const isHeaderInView = useInView(headerRef, { once: true, amount: 0.01 });
   const isContentInView = useInView(contentRef, { once: true, amount: 0.1 });
-
-  const handleSocialCarouselScroll = (e) => {
-    const { scrollLeft, scrollWidth, clientWidth } = e.target;
-    const maxScroll = scrollWidth - clientWidth;
-    if (maxScroll <= 0) return;
-    const progress = scrollLeft / maxScroll;
-    const n = aboutSocialCards.length;
-    setActiveSocialSlide(Math.min(n - 1, Math.max(0, Math.floor(progress * n))));
-  };
 
   return (
     <div>
@@ -172,39 +195,9 @@ const AboutSectionContent = ({ aboutSocialCards }) => {
             </p>
           </div>
 
-          <div
-            onScroll={handleSocialCarouselScroll}
-            className="md:hidden flex flex-row gap-3 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-2 scrollbar-hide"
-          >
-            {aboutSocialCards.map((card) => (
-              <AboutSocialCard
-                key={card.key}
-                card={card}
-                className="min-w-[min(92vw,320px)] w-[min(92vw,320px)] shrink-0 snap-center"
-              />
-            ))}
-          </div>
-
-          <div className="hidden md:grid md:grid-cols-2 md:gap-4">
-            {aboutSocialCards.map((card) => (
-              <AboutSocialCard key={card.key} card={card} className="min-h-0" />
-            ))}
-          </div>
-
-          <div className="md:hidden flex justify-center gap-2 mt-4">
-            {aboutSocialCards.map((_, index) => (
-              <div
-                key={index}
-                className={`
-                  h-2 rounded-full transition-all duration-300
-                  ${activeSocialSlide === index
-                    ? "w-6"
-                    : "w-2 bg-slate-300"
-                  }
-                `}
-                style={{ backgroundColor: activeSocialSlide === index ? "rgb(21,35,62)" : "" }}
-              />
-            ))}
+          <div className="flex flex-col gap-4">
+            <AboutSharedSocialBlock description={sharedDescription} buttons={sharedButtons} />
+            <AboutSocialCard card={vkChannelCard} className="min-h-0" />
           </div>
         </div>
       </motion.div>
@@ -270,7 +263,8 @@ export default function FishShopLanding() {
 
   const telegramUrl = `https://t.me/${SHOP_CONFIG.telegramUsername}`;
   const socialLinks = getSocialLinks(telegramUrl);
-  const aboutSocialCards = getAboutSocialCards(telegramUrl);
+  const aboutSharedButtons = getAboutSharedSocialButtons(telegramUrl);
+  const aboutVkChannelCard = getAboutVkChannelCard();
   const handleScroll = (e) => {
     const { scrollLeft, scrollWidth, clientWidth } = e.target;
     const maxScroll = scrollWidth - clientWidth;
@@ -463,7 +457,11 @@ export default function FishShopLanding() {
 
       <section id="about" className="py-16 bg-white relative">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <AboutSectionContent aboutSocialCards={aboutSocialCards} />
+          <AboutSectionContent
+            sharedDescription={ABOUT_SHARED_SOCIAL_DESCRIPTION}
+            sharedButtons={aboutSharedButtons}
+            vkChannelCard={aboutVkChannelCard}
+          />
         </div>
       </section>
 
