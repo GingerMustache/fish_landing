@@ -1,16 +1,67 @@
-import { useState, useRef } from 'react';
-import { MapPin, Navigation, Send, Menu, X, Info, ExternalLink } from 'lucide-react';
-import { motion, AnimatePresence, useInView } from 'framer-motion';
+import { AnimatePresence, motion, useInView } from 'framer-motion';
+import { ExternalLink, Info, MapPin, Menu, MessageCircle, Navigation, Radio, Send, Users, X } from 'lucide-react';
+import { useRef, useState } from 'react';
 
 // --- CONFIGURATION ---
 const SHOP_CONFIG = {
   name: "Рыба моя",
   telegramUsername: "ryba_moya_gubern",
+  vkGroupUrl: "https://vk.ru/club236313284",
+  vkChannelUrl:
+    "https://vk.ru/?u=2&to=L2ltL2NoYW5uZWxzLy0yMzczNzc4MDU/dDJmcz0wMTQzZGU1N2QyMmU1YzJiZDRfMw--",
+  maxMessengerUrl: "https://max.ru/join/bT9qTZaXzce5UGbIY1M1bJrO2CNwg5UPlNXSHbPGmuc",
   address: "ул. Кузнецова, 6А, Новокузнецк (Губернский рынок)",
   yandexMapLink: "https://yandex.ru/maps/org/ryba_moya/143227952967/?ll=87.136978%2C53.746522&z=17",
   yandexMapsRouteUrl: "https://yandex.ru/maps/237/novokuznetsk/?ll=87.136978%2C53.746522&mode=routes&rtext=~53.746724%2C87.137262&rtt=auto&ruri=~ymapsbm1%3A%2F%2Forg%3Foid%3D143227952967&z=17",
   twoGisUrl: "https://2gis.ru/novokuznetsk/firm/70000001031547900",
 };
+
+const getSocialLinks = (telegramUrl) => [
+  { href: telegramUrl, label: "Телеграм" },
+  { href: SHOP_CONFIG.vkGroupUrl, label: "Группа ВК" },
+  { href: SHOP_CONFIG.vkChannelUrl, label: "Канал ВК" },
+  { href: SHOP_CONFIG.maxMessengerUrl, label: "MAX" },
+];
+
+const getAboutSocialCards = (telegramUrl) => [
+  {
+    key: "telegram",
+    href: telegramUrl,
+    title: "Телеграм",
+    description:
+      "Подпишитесь на канал — новые поставки, акции и специальные предложения.",
+    cta: "Перейти",
+    icon: Send,
+    iconBg: "bg-sky-100 text-sky-600",
+  },
+  {
+    key: "vkGroup",
+    href: SHOP_CONFIG.vkGroupUrl,
+    title: "Группа ВКонтакте",
+    description: "Общение, отзывы и вопросы — присоединяйтесь к сообществу покупателей.",
+    cta: "Перейти",
+    icon: Users,
+    iconBg: "bg-blue-100 text-blue-600",
+  },
+  {
+    key: "vkChannel",
+    href: SHOP_CONFIG.vkChannelUrl,
+    title: "Канал ВКонтакте",
+    description: "Новости, анонсы и короткие обновления в ленте ВК.",
+    cta: "Перейти",
+    icon: Radio,
+    iconBg: "bg-indigo-100 text-indigo-600",
+  },
+  {
+    key: "max",
+    href: SHOP_CONFIG.maxMessengerUrl,
+    title: "Мессенджер MAX",
+    description: "Напишите нам напрямую — ответим на вопросы и поможем с заказом.",
+    cta: "Перейти",
+    icon: MessageCircle,
+    iconBg: "bg-violet-100 text-violet-600",
+  },
+];
 
 // --- COMPONENTS ---
 
@@ -33,21 +84,49 @@ const ActionButton = ({ title, subLabel, onClick, icon: Icon, colorClass }) => (
 const PrimaryButton = ({ children, onClick, icon: Icon }) => (
   <motion.button
     onClick={onClick}
-    className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-bold text-white shadow-lg shadow-blue-900/20 hover:shadow-blue-900/40 hover:-translate-y-1 transition-all active:translate-y-0 active:scale-95 text-lg"
+    className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full font-bold text-white text-sm shadow-md shadow-blue-900/15 hover:shadow-lg hover:shadow-blue-900/30 hover:-translate-y-0.5 transition-all active:translate-y-0 active:scale-95"
     style={{ backgroundColor: 'rgb(21,35,62)' }}
     whileTap={{ scale: 0.97 }}
   >
-    {Icon && <Icon size={22} />}
+    {Icon && <Icon size={14} />}
     {children}
   </motion.button>
 );
 
-const AboutSectionContent = ({ telegramUrl }) => {
+const AboutSocialCard = ({ card, className = "" }) => {
+  const Icon = card.icon;
+  return (
+    <div
+      className={`flex flex-col items-center text-center bg-white rounded-2xl p-6 md:p-8 border border-slate-100 shadow-sm ${className}`}
+    >
+      <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-5 ${card.iconBg}`}>
+        <Icon size={32} />
+      </div>
+      <h3 className="text-xl font-bold text-slate-900 mb-3">{card.title}</h3>
+      <p className="text-slate-500 mb-6 text-sm leading-relaxed flex-1">{card.description}</p>
+      <PrimaryButton icon={Icon} onClick={() => window.open(card.href, "_blank")}>
+        {card.cta}
+      </PrimaryButton>
+    </div>
+  );
+};
+
+const AboutSectionContent = ({ aboutSocialCards }) => {
   const headerRef = useRef(null);
   const contentRef = useRef(null);
+  const [activeSocialSlide, setActiveSocialSlide] = useState(0);
 
   const isHeaderInView = useInView(headerRef, { once: true, amount: 0.01 });
   const isContentInView = useInView(contentRef, { once: true, amount: 0.1 });
+
+  const handleSocialCarouselScroll = (e) => {
+    const { scrollLeft, scrollWidth, clientWidth } = e.target;
+    const maxScroll = scrollWidth - clientWidth;
+    if (maxScroll <= 0) return;
+    const progress = scrollLeft / maxScroll;
+    const n = aboutSocialCards.length;
+    setActiveSocialSlide(Math.min(n - 1, Math.max(0, Math.floor(progress * n))));
+  };
 
   return (
     <div>
@@ -75,25 +154,57 @@ const AboutSectionContent = ({ telegramUrl }) => {
       >
         <div className="prose prose-lg mx-auto text-slate-600 mb-12 leading-relaxed">
           <p className="mb-4">
-            «Рыба моя» — это не просто магазин, это место, где мы тщательно отбираем для вас самые свежие морепродукты. Мы работаем напрямую с проверенными поставщиками, чтобы гарантировать качество каждого товара на прилавке.
+            «Рыба моя» - место, где море встречается с вашим столом.
+          </p>
+          <p className="mb-4">
+            Мы тщательно отбираем только самые свежие морепродукты и работаем напрямую с проверенными поставщиками, чтобы каждый товар на прилавке говорил сам за себя: вкусом, запахом, качеством.
           </p>
           <p>
             В нашем ассортименте вы найдете всё: от свежемороженой рыбы до изысканных деликатесов. Мы гордимся тем, что наши покупатели возвращаются к нам снова и снова. Приходите и убедитесь сами!
           </p>
         </div>
 
-        <div className="bg-slate-50 rounded-3xl p-8 md:p-12 border border-slate-100">
-          <div className="flex flex-col items-center">
-            <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-6">
-              <Send size={32} />
-            </div>
-            <h3 className="text-2xl font-bold text-slate-900 mb-3">Свежий улов в Телеграм</h3>
-            <p className="text-slate-500 mb-8 max-w-md">
-              Подпишитесь на наш канал, чтобы первыми узнавать о новых поставках, акциях и специальных предложениях.
+        <div className="bg-slate-50 rounded-3xl p-6 md:p-12 border border-slate-100">
+          <div className="flex flex-col items-center mb-8 md:mb-10">
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">Мы в соцсетях</h3>
+            <p className="text-slate-500 text-sm md:text-base max-w-md">
+              Выберите удобный канал — новости, акции и общение с нами.
             </p>
-            <PrimaryButton icon={Send} onClick={() => window.open(telegramUrl, '_blank')}>
-              Перейти в группу
-            </PrimaryButton>
+          </div>
+
+          <div
+            onScroll={handleSocialCarouselScroll}
+            className="md:hidden flex flex-row gap-3 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-2 scrollbar-hide"
+          >
+            {aboutSocialCards.map((card) => (
+              <AboutSocialCard
+                key={card.key}
+                card={card}
+                className="min-w-[min(92vw,320px)] w-[min(92vw,320px)] shrink-0 snap-center"
+              />
+            ))}
+          </div>
+
+          <div className="hidden md:grid md:grid-cols-2 md:gap-4">
+            {aboutSocialCards.map((card) => (
+              <AboutSocialCard key={card.key} card={card} className="min-h-0" />
+            ))}
+          </div>
+
+          <div className="md:hidden flex justify-center gap-2 mt-4">
+            {aboutSocialCards.map((_, index) => (
+              <div
+                key={index}
+                className={`
+                  h-2 rounded-full transition-all duration-300
+                  ${activeSocialSlide === index
+                    ? "w-6"
+                    : "w-2 bg-slate-300"
+                  }
+                `}
+                style={{ backgroundColor: activeSocialSlide === index ? "rgb(21,35,62)" : "" }}
+              />
+            ))}
           </div>
         </div>
       </motion.div>
@@ -101,7 +212,7 @@ const AboutSectionContent = ({ telegramUrl }) => {
   );
 };
 
-const FooterContent = ({ shopConfig }) => {
+const FooterContent = ({ shopConfig, socialLinks }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
 
@@ -125,8 +236,26 @@ const FooterContent = ({ shopConfig }) => {
     >
       <div className="max-w-7xl mx-auto px-4">
         <motion.p variants={itemVariants} className="font-bold text-slate-200 text-lg mb-2">{shopConfig.name}</motion.p>
-        <motion.p variants={itemVariants} className="mb-8 opacity-60">{shopConfig.address}</motion.p>
-        <motion.p variants={itemVariants}>© 2025 Все права защищены.</motion.p>
+        <motion.p variants={itemVariants} className="mb-6 opacity-60">{shopConfig.address}</motion.p>
+        <motion.div
+          variants={itemVariants}
+          className="flex flex-wrap justify-center items-center gap-x-1 gap-y-2 mb-8 text-sm"
+        >
+          {socialLinks.map((link, index) => (
+            <span key={link.label} className="inline-flex items-center">
+              {index > 0 && <span className="mx-2 text-slate-600 select-none" aria-hidden>·</span>}
+              <a
+                href={link.href}
+                target="_blank"
+                rel="noreferrer"
+                className="font-medium text-slate-300 hover:text-white transition-colors"
+              >
+                {link.label}
+              </a>
+            </span>
+          ))}
+        </motion.div>
+        <motion.p variants={itemVariants}>© 2026 Все права защищены.</motion.p>
       </div>
     </motion.footer>
   );
@@ -135,11 +264,13 @@ const FooterContent = ({ shopConfig }) => {
 // --- MAIN APP COMPONENT ---
 
 export default function FishShopLanding() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isNavMenuOpen, setIsNavMenuOpen] = useState(false);
 
   const [activeSlide, setActiveSlide] = useState(0);
 
   const telegramUrl = `https://t.me/${SHOP_CONFIG.telegramUsername}`;
+  const socialLinks = getSocialLinks(telegramUrl);
+  const aboutSocialCards = getAboutSocialCards(telegramUrl);
   const handleScroll = (e) => {
     const { scrollLeft, scrollWidth, clientWidth } = e.target;
     const maxScroll = scrollWidth - clientWidth;
@@ -184,37 +315,41 @@ export default function FishShopLanding() {
               </span>
             </div>
 
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#about" className="font-medium hover:text-blue-900 transition-colors">О нас</a>
-              <button
-                onClick={() => window.open(telegramUrl, '_blank')}
-                className="font-bold text-blue-900 hover:opacity-80 transition-opacity"
-              >
-                Телеграм
-              </button>
-            </div>
-
             <button
-              className="md:hidden p-2 text-slate-600"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              type="button"
+              aria-expanded={isNavMenuOpen}
+              aria-label={isNavMenuOpen ? "Закрыть меню" : "Открыть меню"}
+              className="p-2 text-slate-600"
+              onClick={() => setIsNavMenuOpen(!isNavMenuOpen)}
             >
-              {isMobileMenuOpen ? <X /> : <Menu />}
+              {isNavMenuOpen ? <X /> : <Menu />}
             </button>
           </div>
         </div>
 
         <AnimatePresence>
-          {isMobileMenuOpen && (
+          {isNavMenuOpen && (
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
-              className="md:hidden bg-white border-t border-slate-100 absolute w-full shadow-xl"
+              className="bg-white border-t border-slate-100 absolute w-full shadow-xl left-0"
             >
-              <div className="px-4 pt-2 pb-2 space-y-2">
-                <a href="#about" onClick={() => setIsMobileMenuOpen(false)} className="block py-3 px-4 rounded-lg hover:bg-slate-50 text-slate-800 font-medium">О нас</a>
-                <a href={telegramUrl} target="_blank" rel="noreferrer" className="block py-3 px-4 rounded-lg hover:bg-slate-50 text-blue-900 font-bold">Телеграм Канал</a>
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-2 space-y-2">
+                <a href="#about" onClick={() => setIsNavMenuOpen(false)} className="block py-3 px-4 rounded-lg hover:bg-slate-50 text-slate-800 font-medium">О нас</a>
+                {socialLinks.map((link) => (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() => setIsNavMenuOpen(false)}
+                    className="block py-3 px-4 rounded-lg hover:bg-slate-50 text-blue-900 font-bold"
+                  >
+                    {link.label}
+                  </a>
+                ))}
               </div>
             </motion.div>
           )}
@@ -328,11 +463,11 @@ export default function FishShopLanding() {
 
       <section id="about" className="py-16 bg-white relative">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <AboutSectionContent telegramUrl={telegramUrl} />
+          <AboutSectionContent aboutSocialCards={aboutSocialCards} />
         </div>
       </section>
 
-      <FooterContent shopConfig={SHOP_CONFIG} />
+      <FooterContent shopConfig={SHOP_CONFIG} socialLinks={socialLinks} />
 
     </motion.div>
   );
