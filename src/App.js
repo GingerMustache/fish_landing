@@ -352,13 +352,15 @@ export default function FishShopLanding() {
   const [isNavMenuOpen, setIsNavMenuOpen] = useState(false);
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
 
-  useEffect(() => {
-    // Open bottom sheet after a short delay on load
-    const timer = setTimeout(() => {
-      setIsBottomSheetOpen(true);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
+useEffect(() => {
+  const isMobile = window.innerWidth < 768;
+  if (!isMobile) return;
+
+  const timer = setTimeout(() => {
+    setIsBottomSheetOpen(true);
+  }, 1500);
+  return () => clearTimeout(timer);
+}, []);
 
   const [activeSlide, setActiveSlide] = useState(0);
 
