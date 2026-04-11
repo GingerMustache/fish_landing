@@ -1,6 +1,6 @@
 import { AnimatePresence, motion, useInView } from 'framer-motion';
 import { ExternalLink, Info, MapPin, Menu, MessageCircle, Navigation, Radio, Send, Users, X } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // --- CONFIGURATION ---
 const SHOP_CONFIG = {
@@ -205,6 +205,98 @@ const AboutSectionContent = ({ sharedDescription, sharedButtons, vkChannelCard }
   );
 };
 
+const BottomSheet = ({ isOpen, onClose, sharedButtons, vkChannelCard }) => (
+  <AnimatePresence>
+    {isOpen && (
+      <>
+        {/* Backdrop */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100]"
+        />
+
+        {/* Sheet */}
+        <motion.div
+          initial={{ y: "100%" }}
+          animate={{ y: 0 }}
+          exit={{ y: "100%" }}
+          transition={{ type: "spring", damping: 25, stiffness: 200 }}
+          className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[2.5rem] shadow-2xl z-[101] px-6 pt-8 pb-10 md:pb-12 max-h-[90vh] overflow-y-auto"
+        >
+          {/* Handle */}
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-slate-200 rounded-full" />
+
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 transition-colors"
+          >
+            <X size={24} />
+          </button>
+
+          <div className="max-w-xl mx-auto text-center">
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">Мы в соцсетях</h3>
+            <p className="text-slate-500 text-sm mb-8">
+              Выберите удобный канал — новости, акции и общение с нами.
+            </p>
+
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col items-center bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                <div className="flex flex-row flex-wrap justify-center items-center gap-4 mb-6">
+                  {sharedButtons.map((btn) => {
+                    const Icon = btn.icon;
+                    return (
+                      <div
+                        key={btn.key}
+                        className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${btn.iconBg}`}
+                      >
+                        <Icon size={28} />
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 w-full">
+                  {sharedButtons.map((btn) => (
+                    <PrimaryButton
+                      key={btn.key}
+                      aria-label={btn.ariaLabel}
+                      onClick={() => {
+                        window.open(btn.href, "_blank");
+                        onClose();
+                      }}
+                    >
+                      {btn.label}
+                    </PrimaryButton>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col items-center bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${vkChannelCard.iconBg}`}>
+                  <vkChannelCard.icon size={28} />
+                </div>
+                <p className="text-slate-500 mb-4 text-sm leading-relaxed">{vkChannelCard.description}</p>
+                <PrimaryButton
+                  icon={vkChannelCard.icon}
+                  onClick={() => {
+                    window.open(vkChannelCard.href, "_blank");
+                    onClose();
+                  }}
+                >
+                  {vkChannelCard.cta}
+                </PrimaryButton>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </>
+    )}
+  </AnimatePresence>
+);
+
 const FooterContent = ({ shopConfig, socialLinks }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
@@ -258,6 +350,15 @@ const FooterContent = ({ shopConfig, socialLinks }) => {
 
 export default function FishShopLanding() {
   const [isNavMenuOpen, setIsNavMenuOpen] = useState(false);
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+
+  useEffect(() => {
+    // Open bottom sheet after a short delay on load
+    const timer = setTimeout(() => {
+      setIsBottomSheetOpen(true);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const [activeSlide, setActiveSlide] = useState(0);
 
@@ -467,6 +568,12 @@ export default function FishShopLanding() {
 
       <FooterContent shopConfig={SHOP_CONFIG} socialLinks={socialLinks} />
 
+      <BottomSheet
+        isOpen={isBottomSheetOpen}
+        onClose={() => setIsBottomSheetOpen(false)}
+        sharedButtons={aboutSharedButtons}
+        vkChannelCard={aboutVkChannelCard}
+      />
     </motion.div>
   );
 }
